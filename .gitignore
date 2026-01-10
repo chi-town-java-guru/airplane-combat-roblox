@@ -1,0 +1,36 @@
+# Roblox Studio specific
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+
+# Temporary files
+*.tmp
+*.temp
+~*
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Build artifacts
+build/
+dist/
+
+# Node modules (if using npm)
+node_modules/
+
+# Package files
+*.zip
+*.tar.gz
+*.rar
+
+# Wine related
+.wine/
