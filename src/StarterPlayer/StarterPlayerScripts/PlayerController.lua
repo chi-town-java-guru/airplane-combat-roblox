@@ -31,10 +31,9 @@ local combatCooldown = 0
 humanoid.WalkSpeed = INSIDE_PLANE_SPEED
 humanoid.JumpPower = JUMP_POWER
 
--- Create remote events for combat
-local combatEvent = Instance.new("RemoteEvent")
-combatEvent.Name = "CombatEvent"
-combatEvent.Parent = ReplicatedStorage
+-- Get remote events from centralized location
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local combatEvent = remoteEvents:WaitForChild("CombatEvent")
 
 -- Function to find nearest enemy
 local function findNearestEnemy(range)

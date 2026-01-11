@@ -20,10 +20,9 @@ local playersInGame = {}
 local eliminatedPlayers = {}
 local capturedEnemies = {}
 
--- Game events
-local gameEvent = Instance.new("RemoteEvent")
-gameEvent.Name = "GameEvent"
-gameEvent.Parent = ReplicatedStorage
+-- Use centralized remote events instead of creating duplicates
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local gameEvent = remoteEvents:WaitForChild("GameStateEvent")
 
 -- Initialize game
 local function initializeGame()
@@ -183,9 +182,14 @@ local function eliminatePlayer(player, reason)
     end
 end
 
--- Handle player joining
+-- Handle player joining with connection cleanup
+local playerConnections = {}
+
 Players.PlayerAdded:Connect(function(player)
     table.insert(playersInGame, player)
+    
+    -- Store player-specific connections for cleanup
+    local connections = {}
     
     -- Notify player
     gameEvent:FireClient(player, "gameJoin", {
@@ -194,11 +198,11 @@ Players.PlayerAdded:Connect(function(player)
     })
     
     -- Handle character spawning
-    player.CharacterAdded:Connect(function(character)
+    local characterAddedConnection = player.CharacterAdded:Connect(function(character)
         local humanoid = character:WaitForChild("Humanoid")
         
         -- Handle death
-        humanoid.Died:Connect(function()
+        local diedConnection = humanoid.Died:Connect(function()
             if gameState == "playing" then
                 eliminatePlayer(player, "death")
                 
@@ -211,13 +215,28 @@ Players.PlayerAdded:Connect(function(player)
                 end)
             end
         end)
+        table.insert(connections, diedConnection)
     end)
+    table.insert(connections, characterAddedConnection)
+    
+    playerConnections[player.UserId] = connections
     
     print(player.Name .. " joined the game")
 end)
 
--- Handle player leaving
+-- Handle player leaving with connection cleanup
 Players.PlayerRemoving:Connect(function(player)
+    -- Clean up player-specific connections
+    local connections = playerConnections[player.UserId]
+    if connections then
+        for _, connection in ipairs(connections) do
+            if connection and connection.Disconnect then
+                connection:Disconnect()
+            end
+        end
+        playerConnections[player.UserId] = nil
+    end
+    
     for i, playerInGame in ipairs(playersInGame) do
         if playerInGame == player then
             table.remove(playersInGame, i)

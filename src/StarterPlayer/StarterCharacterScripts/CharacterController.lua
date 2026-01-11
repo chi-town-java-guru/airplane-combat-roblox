@@ -118,8 +118,11 @@ local function playCombatAnimation(animationType)
     end
 end
 
--- Connect to damage events
-combatEvent.OnClientEvent:Connect(function(action, data)
+-- Connection management
+local connections = {}
+
+-- Connect to damage events with proper cleanup
+local combatConnection = combatEvent.OnClientEvent:Connect(function(action, data)
     if action == "TakeDamage" then
         takeDamage(data.damage)
     elseif action == "Heal" then
@@ -128,9 +131,10 @@ combatEvent.OnClientEvent:Connect(function(action, data)
         playCombatAnimation(data.animationType)
     end
 end)
+table.insert(connections, combatConnection)
 
--- Handle character death
-humanoid.Died:Connect(function()
+-- Handle character death with cleanup
+local deathConnection = humanoid.Died:Connect(function()
     -- Remove health display
     if healthBar and healthBar.Parent then
         healthBar.Parent:Destroy()
@@ -138,7 +142,16 @@ humanoid.Died:Connect(function()
     
     -- Notify server
     combatEvent:FireServer("PlayerDied")
+    
+    -- Clean up connections
+    for _, connection in ipairs(connections) do
+        if connection and connection.Disconnect then
+            connection:Disconnect()
+        end
+    end
+    connections = {}
 end)
+table.insert(connections, deathConnection)
 
 -- Handle respawn
 player.CharacterAdded:Connect(function(newCharacter)

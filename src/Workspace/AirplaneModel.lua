@@ -107,17 +107,19 @@ end
 -- Create airplane windows
 local windows = {}
 for i = 1, 8 do
-    local window = Instance.new("Part")
-    window.Name = "Window_" .. i
-    window.Size = Vector3.new(1, 2, 0.5)
-    window.Position = Vector3.new(-20 + (i-1) * 5, 11, j == 1 and -3.5 or 3.5)
-    window.BrickColor = BrickColor.new("Light blue")
-    window.Material = Enum.Material.Glass
-    window.Transparency = 0.3
-    window.Anchored = true
-    window.CanCollide = false
-    window.Parent = airplane
-    table.insert(windows, window)
+    for j = 1, 2 do
+        local window = Instance.new("Part")
+        window.Name = "Window_" .. i .. "_" .. j
+        window.Size = Vector3.new(1, 2, 0.5)
+        window.Position = Vector3.new(-20 + (i-1) * 5, 11, j == 1 and -3.5 or 3.5)
+        window.BrickColor = BrickColor.new("Light blue")
+        window.Material = Enum.Material.Glass
+        window.Transparency = 0.3
+        window.Anchored = true
+        window.CanCollide = false
+        window.Parent = airplane
+        table.insert(windows, window)
+    end
 end
 
 -- Add collision groups for proper physics

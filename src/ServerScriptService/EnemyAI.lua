@@ -239,11 +239,38 @@ local function initializeEnemies()
     print("Created " .. #enemies .. " enemies")
 end
 
--- Main AI update loop
-RunService.Heartbeat:Connect(function()
-    for _, enemyData in ipairs(enemies) do
-        if enemyData.model and enemyData.model.Parent and enemyData.humanoid.Health > 0 then
-            updateEnemy(enemyData)
+-- Main AI update loop with performance optimization
+local lastUpdateTime = 0
+local UPDATE_INTERVAL = 0.1 -- Update every 100ms instead of every frame
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    local currentTime = tick()
+    
+    -- Throttle updates for performance
+    if currentTime - lastUpdateTime < UPDATE_INTERVAL then
+        return
+    end
+    lastUpdateTime = currentTime
+    
+    -- Update enemies with error handling
+    for i = #enemies, 1, -1 do
+        local enemyData = enemies[i]
+        if enemyData and enemyData.model and enemyData.model.Parent and enemyData.humanoid and enemyData.humanoid.Health > 0 then
+            local success, errorMsg = pcall(function()
+                updateEnemy(enemyData)
+            end)
+            
+            if not success then
+                warn("Error updating enemy AI: " .. tostring(errorMsg))
+                -- Remove problematic enemy
+                if enemyData.model then
+                    enemyData.model:Destroy()
+                end
+                table.remove(enemies, i)
+            end
+        else
+            -- Clean up dead/destroyed enemies
+            table.remove(enemies, i)
         end
     end
 end)

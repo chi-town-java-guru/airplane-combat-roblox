@@ -17,8 +17,9 @@ local gameActive = true
 local capturedPlayers = {}
 local eliminatedPlayers = {}
 
--- Get combat remote event
-local combatEvent = ReplicatedStorage:WaitForChild("CombatEvent")
+-- Get combat remote event from centralized location
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local combatEvent = remoteEvents:WaitForChild("CombatEvent")
 
 -- Function to apply damage to player
 local function applyDamage(player, damage)

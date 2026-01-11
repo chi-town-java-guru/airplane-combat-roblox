@@ -228,8 +228,8 @@ player.CharacterAdded:Connect(function(character)
     updateHealth()
 end)
 
--- Update health every frame
-game:GetService("RunService").Heartbeat:Connect(updateHealth)
+-- Update health every frame with connection management
+local healthUpdateConnection = game:GetService("RunService").Heartbeat:Connect(updateHealth)
 
 -- Expose functions to other scripts
 _G.GameUI = {

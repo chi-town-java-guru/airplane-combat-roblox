@@ -117,16 +117,29 @@ function PlayerDataManager:loadPlayerData()
 end
 
 function PlayerDataManager:savePlayerData()
-    -- In a real implementation, this would save to DataStore
-    local success, errorMessage = pcall(function()
-        self.dataStore:SetAsync(self.player.UserId, self.data)
-    end)
+    local maxRetries = 3
+    local retryDelay = 1
     
-    if not success then
-        warn("Failed to save player data for " .. self.player.Name .. ": " .. tostring(errorMessage))
+    for attempt = 1, maxRetries do
+        local success, errorMessage = pcall(function()
+            self.dataStore:SetAsync(self.player.UserId, self.data)
+        end)
+        
+        if success then
+            return true
+        else
+            warn("Failed to save player data for " .. self.player.Name .. " (attempt " .. attempt .. "/" .. maxRetries .. "): " .. tostring(errorMessage))
+            
+            if attempt < maxRetries then
+                wait(retryDelay)
+                retryDelay = retryDelay * 2 -- Exponential backoff
+            end
+        end
     end
     
-    return success
+    -- Final attempt failed, try backup save
+    warn("All save attempts failed for " .. self.player.Name .. ". Data may be lost.")
+    return false
 end
 
 function PlayerDataManager:addExperience(amount)
