@@ -1,8 +1,8 @@
-# Roblox Studio specific
+# Roblox Studio specific (excluding model files we want to track)
 *.rbxl
 *.rbxlx
-*.rbxm
-*.rbxmx
+# *.rbxm  # Commented out to allow tracking model files
+# *.rbxmx # Commented out to allow tracking model files
 
 # Temporary files
 *.tmp
